@@ -1,0 +1,30 @@
+#game-board {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin: 3rem 0;
+  padding: 0;
+  flex-direction: column;
+}
+
+#game-board ol {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+}
+
+#game-board button {
+  width: 8rem;
+  height: 8rem;
+  border: none;
+  background: #ea580b;
+  color: #3f3b00;
+  font-size: 5rem;
+  cursor: pointer;
+  font-family: "Arial", cursive;
+  padding: 1rem;
+}
