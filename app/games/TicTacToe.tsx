@@ -1,7 +1,6 @@
 "use client";
-import GameBoard from "@/components/games/tictactoe/GameBoard";
-import Log from "@/components/games/tictactoe/Log";
-import Player from "@/components/games/tictactoe/Player";
+
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -10,21 +9,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import React, { useState } from "react";
 import { ResponsiveContainer } from "recharts";
-import { WINNING_COMBINATIONS } from "@/components/games/tictactoe/winning-combinations";
-import Gameover from "@/components/games/tictactoe/Gameover";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import Image from "next/image";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { WINNING_COMBINATIONS } from "@/components/games/tictactoe/winning-combinations";
+import Player from "@/components/games/tictactoe/Player";
+import Log from "@/components/games/tictactoe/Log";
+import Gameover from "@/components/games/tictactoe/Gameover";
+import GameBoard from "@/components/games/tictactoe/GameBoard";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
+import { useCounterStore } from "@/app/store";
+import GameCount from "@/components/GameCount";
+import ToggleMode from "@/components/ui/ToggleMode";
 
 const initialBoard: (string | null)[][] = [
   [null, null, null],
@@ -58,12 +55,9 @@ const TicTacToe = () => {
     x: "Player 1",
     o: "Player 2",
   });
-  console.log("players", players);
   const [gameTurns, setGameTurns] = useState<GameTurnProps[]>([]);
-  const { theme, setTheme } = useTheme();
-  const dark = theme === "dark";
-
   const activePlayer = deriveActivePlayer(gameTurns);
+  const { gameCount, increment } = useCounterStore();
 
   let gameBoard = [...initialBoard.map((array) => [...array])];
 
@@ -74,6 +68,7 @@ const TicTacToe = () => {
     gameBoard[row][col] = player;
   }
   let winner;
+
   for (const combination of WINNING_COMBINATIONS) {
     const firstSquareSymbol =
       gameBoard[combination[0].row][combination[0].column];
@@ -86,11 +81,16 @@ const TicTacToe = () => {
       firstSquareSymbol &&
       firstSquareSymbol === secondSquareSymbol &&
       firstSquareSymbol === thirdSquareSymbol
-    )
+    ) {
       winner = players[firstSquareSymbol as keyof PlayerStateProps];
+    }
   }
 
   const hasDraw = gameTurns.length === 9 && !winner;
+
+  function handleRestart() {
+    setGameTurns([]);
+  }
 
   function onSelectSquare(rowIndex: number, colIndex: number) {
     setGameTurns((prevGameTurns) => {
@@ -104,10 +104,6 @@ const TicTacToe = () => {
     });
   }
 
-  function handleRestart() {
-    setGameTurns([]);
-  }
-
   function handlePlayerNameChange(symbol: string, newName: string) {
     setPlayers((prevPlayers) => {
       return {
@@ -116,30 +112,18 @@ const TicTacToe = () => {
       };
     });
   }
-
   return (
     <Card className="">
-      <AspectRatio ratio={4 / 3} className="bg-muted">
-        <Image
-          src="https://img.freepik.com/free-vector/hands-holding-pencils-play-tic-tac-toe-people-drawing-crosses-noughts-simple-game-children-flat-vector-illustration-strategy-concept-banner-website-design-landing-web-page_74855-24786.jpg?w=900&t=st=1712658595~exp=1712659195~hmac=a5f7a17b84eac123c5be6903976cbdc078e6b2f313bb64bf155d0359b23b56ed"
-          alt="Photo by Drew Beamer"
-          fill
-          className="object-cover"
-        />
-      </AspectRatio>
       <CardHeader>
         <div className="text-center">
           <CardTitle>
             <div>TicTacToe</div>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setTheme(`${dark ? "light" : "dark"}`)}
-            >
-              {dark ? <Moon /> : <Sun />}
-            </Button>
+            <ToggleMode />
           </CardTitle>
-          <CardDescription>This game is made up of T3 Stack </CardDescription>
+          <CardDescription>
+            {/* <GameCount gameCount={gameCount} /> */}
+            {gameCount}
+          </CardDescription>
         </div>
       </CardHeader>
       <CardContent>
@@ -166,7 +150,7 @@ const TicTacToe = () => {
               <Gameover
                 winner={winner}
                 hasDraw={hasDraw}
-                onRestart={handleRestart}
+                setGameTurn={handleRestart}
               />
             </div>
           </ResponsiveContainer>
